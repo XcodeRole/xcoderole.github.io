@@ -16,21 +16,23 @@
   <meta name="author" content="xcoderole">
   <meta name="keywords" content="">
   
-    <meta name="description" content="golang rpcGo语言高级编程 我的实现https:&#x2F;&#x2F;github.com&#x2F;XcodeRole&#x2F;6.824-golabs-2021 思路coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经">
+    <meta name="description" content="内存管理交换内存交换和内存覆盖内存覆盖和内存交换_dongyanxia1000的专栏-CSDN博客_内存覆盖技术 连续内存分配基本概念 属于早期内存分配方法。 内存通常分为两个区域：一个用于驻留操作系统，另一个用于用户进程。  内存保护 重定位寄存器(基址寄存器)和界限寄存器，或者上下界寄存器 MMU通过将逻辑地址加上重定位寄存器的值进行映射  内存分配固定分区 将内存分为多个固定大小的分区(pa">
 <meta property="og:type" content="article">
-<meta property="og:title" content="lab1 mapreduce">
-<meta property="og:url" content="http://xcoderole.github.io/2022/10/01/MIT%206.824%20lab1%20mapreduce/index.html">
+<meta property="og:title" content="读书笔记--内存管理">
+<meta property="og:url" content="http://xcoderole.github.io/2022/10/01/mem/index.html">
 <meta property="og:site_name" content="XcodeRole的个人博客">
-<meta property="og:description" content="golang rpcGo语言高级编程 我的实现https:&#x2F;&#x2F;github.com&#x2F;XcodeRole&#x2F;6.824-golabs-2021 思路coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经">
+<meta property="og:description" content="内存管理交换内存交换和内存覆盖内存覆盖和内存交换_dongyanxia1000的专栏-CSDN博客_内存覆盖技术 连续内存分配基本概念 属于早期内存分配方法。 内存通常分为两个区域：一个用于驻留操作系统，另一个用于用户进程。  内存保护 重定位寄存器(基址寄存器)和界限寄存器，或者上下界寄存器 MMU通过将逻辑地址加上重定位寄存器的值进行映射  内存分配固定分区 将内存分为多个固定大小的分区(pa">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-01T12:25:50.728Z">
-<meta property="article:modified_time" content="2022-10-01T12:33:29.161Z">
+<meta property="og:image" content="http://xcoderole.github.io/2022/10/01/mem/0.png">
+<meta property="article:published_time" content="2022-10-01T14:17:01.838Z">
+<meta property="article:modified_time" content="2022-10-01T14:50:34.011Z">
 <meta property="article:author" content="xcoderole">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://xcoderole.github.io/2022/10/01/mem/0.png">
   
   
   
-  <title>lab1 mapreduce - XcodeRole的个人博客</title>
+  <title>读书笔记--内存管理 - XcodeRole的个人博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -207,7 +209,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="lab1 mapreduce"></span>
+            <span id="subtitle" data-typed-text="读书笔记--内存管理"></span>
           
         </div>
 
@@ -218,7 +220,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-10-01 20:25" pubdate>
+        <time datetime="2022-10-01 22:17" pubdate>
           2022年10月1日 晚上
         </time>
       </span>
@@ -230,7 +232,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.6k 字
+          1.2k 字
         
       </span>
     
@@ -241,7 +243,7 @@
         
         
         
-          22 分钟
+          11 分钟
         
       </span>
     
@@ -287,40 +289,65 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">lab1 mapreduce</h1>
+            <h1 style="display: none">读书笔记--内存管理</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="golang-rpc"><a href="#golang-rpc" class="headerlink" title="golang rpc"></a>golang rpc</h2><p><a target="_blank" rel="noopener" href="https://chai2010.cn/advanced-go-programming-book/ch4-rpc/ch4-01-rpc-intro.html">Go语言高级编程</a></p>
-<h2 id="我的实现"><a href="#我的实现" class="headerlink" title="我的实现"></a>我的实现</h2><p><a target="_blank" rel="noopener" href="https://github.com/XcodeRole/6.824-golabs-2021">https://github.com/XcodeRole/6.824-golabs-2021</a></p>
-<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经分配的正在运行的队列</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Coordinator <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// Your definitions here.</span></span><br><span class="line">	<span class="comment">// mapcounter    int</span></span><br><span class="line">	<span class="comment">// reducecounter int</span></span><br><span class="line">	<span class="comment">// idcounter     int</span></span><br><span class="line">	<span class="comment">// 不用counter，四个队列来管理</span></span><br><span class="line">	waitformap    Mapqueue</span><br><span class="line">	runmap        runmapmanager</span><br><span class="line">	waitforreduce Reducequeue</span><br><span class="line">	runreduce     runreducemanager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过文件名区分map task，通过reduce id区分reduce task，并且需要注意的一点是在分配reduce任务之前要等待所有的map任务完成</p>
-<p>worker通过for循环不断向coordinator请求任务，分四种情况</p>
+                <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="交换"><a href="#交换" class="headerlink" title="交换"></a>交换</h2><h3 id="内存交换和内存覆盖"><a href="#内存交换和内存覆盖" class="headerlink" title="内存交换和内存覆盖"></a>内存交换和内存覆盖</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/dongyanxia1000/article/details/51425141">内存覆盖和内存交换_dongyanxia1000的专栏-CSDN博客_内存覆盖技术</a></p>
+<h2 id="连续内存分配"><a href="#连续内存分配" class="headerlink" title="连续内存分配"></a>连续内存分配</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><ul>
+<li>属于早期内存分配方法。</li>
+<li>内存通常分为两个区域：一个用于驻留操作系统，另一个用于用户进程。</li>
+</ul>
+<h3 id="内存保护"><a href="#内存保护" class="headerlink" title="内存保护"></a>内存保护</h3><ul>
+<li>重定位寄存器(基址寄存器)和界限寄存器，或者上下界寄存器</li>
+<li>MMU通过将逻辑地址加上重定位寄存器的值进行映射</li>
+</ul>
+<h3 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h3><p><strong>固定分区</strong></p>
+<p>将内存分为多个固定大小的分区(partition)o每个分区可以只包含一个进程。</p>
+<p><strong>可变分区</strong></p>
+<h2 id="非连续内存分配"><a href="#非连续内存分配" class="headerlink" title="非连续内存分配"></a>非连续内存分配</h2><h3 id="页式内存管理"><a href="#页式内存管理" class="headerlink" title="页式内存管理"></a>页式内存管理</h3><p><strong>维护三种表</strong></p>
 <ol>
-<li>waitformap不为空，这时候分配map task，并把任务归到runmap中</li>
-<li>waitformap为空，所有任务都被分配，判断runmap是否为空，若不为空，则返回worker等待，直到runmap也为空，这时侯所有map任务完成</li>
-<li>以上两个队列都空，判断waitforreduce是否为空，不为空则分配reduce task给worker，并且把任务id归到runreduce中</li>
-<li>当waitforreduce也为空，reduce任务也全部被分配，则判断runreduce是否为空，不为空则返回worker等待，直到runreduce为空，所有任务完成</li>
+<li><p>页表</p>
+<p> 每个进程维护一个页表，页表的长度和首地址存放在该进程的PCB中</p>
+</li>
+<li><p>请求表</p>
+<p> 操作系统维护<strong>一张</strong>请求表，记录了每个进程页表的起始地址和长度</p>
+</li>
+<li><p>存储页面表</p>
+<p> 整个系统一张表，记录了内存中各页面是否被分配，有两种表示方式</p>
+<ul>
+<li>位图法，用一块固定区域，每位0&#x2F;1表示某页是否被分配</li>
+<li>空闲页面链，用链表记录，空闲区的第一个和第二个页存储当前空闲区的页面数和下一个空闲区的首地址</li>
+</ul>
+</li>
 </ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Coordinator)</span></span> Dispatch(args *DispatchArgs, reply *DispatchReply) <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !c.waitformap.isEmpty() &#123;</span><br><span class="line">		reply.TaskType = <span class="number">0</span>        <span class="comment">//0-map</span></span><br><span class="line">		task := c.waitformap.Dequeue()</span><br><span class="line">		c.runmap.syncenmap(task, <span class="number">0</span>)</span><br><span class="line">		reply.Filename = <span class="type">string</span>(task)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> !c.runmap.isEmpty() &#123; <span class="comment">//wait util all map task done</span></span><br><span class="line">		reply.TaskType = <span class="number">1</span>       <span class="comment">//1-wait</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> !c.waitforreduce.isEmpty() &#123;</span><br><span class="line">		reply.TaskType = <span class="number">2</span>       <span class="comment">//2-reduce</span></span><br><span class="line">		task := c.waitforreduce.Dequeue()</span><br><span class="line">		c.runreduce.syncenmap(task, <span class="number">0</span>)</span><br><span class="line">		reply.NoReduce = <span class="type">int</span>(task)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> !c.runreduce.isEmpty() &#123;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			这种情况是考虑到当前worker要等待其他worker执行完reduce。</span></span><br><span class="line"><span class="comment">			一旦其他worker执行的reduce任务失败了，还需要重新分配reduce</span></span><br><span class="line"><span class="comment">			和上面的wait map task作用一样，只不过这个是等reduce task</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">		reply.TaskType = <span class="number">1</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		reply.TaskType = <span class="number">3</span>       <span class="comment">//3-finish</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="内存分配-1"><a href="#内存分配-1" class="headerlink" title="内存分配"></a>内存分配</h3><p>页表在内存中占有一块固定的存储区</p>
+<p><strong>静态页式管理</strong></p>
+<ul>
+<li>操作系统将进程的所有页表项全部存储到内存中</li>
+</ul>
+<p><strong>动态页式管理</strong></p>
+<ul>
+<li>操作系统只把程序的部分页面装入内存，在程序运行过程中动态的调入调出页面</li>
+<li>请求调入和预调入<ul>
+<li>请求调入是当执行的指令不在内存中或者数据不在内存中时，发生缺页中断，从外存中将响应的页面调入内存</li>
+<li>预调入是系统通过对外存中的页进行调入顺序计算，估计调入顺序，按顺序进行调度</li>
+</ul>
+</li>
+<li>内存中的页面被置换到外存时需要判断是否被修改</li>
+</ul>
+<p><strong>页面置换算法</strong></p>
+<h2 id="malloc和mmap"><a href="#malloc和mmap" class="headerlink" title="malloc和mmap"></a>malloc和mmap</h2><p>从操作系统角度来看，进程分配内存有两种方式，分别由两个系统调用完成：brk和mmap（不考虑共享内存）。</p>
+<p>1、brk是将数据段(.data)的最高地址指针_edata往高地址推；</p>
+<p>2、mmap是在进程的虚拟地址空间中（堆和栈中间，称为文件映射区域的地方）找一块空闲的虚拟内存。</p>
+<p>这两种方式分配的都是虚拟内存，没有分配物理内存。在第一次访问已分配的虚拟地址空间的时候，发生缺页中断，操作系统负责分配物理内存，然后建立虚拟内存和物理内存之间的映射关系。</p>
+<p>在标准C库中，提供了malloc&#x2F;free函数分配释放内存，这两个函数底层是由brk，mmap，munmap这些系统调用实现的。</p>
+<p>malloc小于<strong>128k</strong>的内存，使用brk分配内存，将_edata往高地址推(只分配虚拟空间，不对应物理内存(因此没有初始化)，第一次读&#x2F;写数据时，引起内核缺页中断，内核才分配对应的物理内存，然后虚拟地址空间建立映射关系)，如下图：</p>
+<img src="/2022/10/01/mem/0.png" srcset="/img/loading.gif" lazyload class="">
 
-<p><strong>如何保证一个woker earlier exit，任务没完成就退出之后的正确性？</strong></p>
-<ol>
-<li><p>runmap以及runreduce通过golang的map实现<code>map[task]int</code> 其中的值就是时间counter，开一个协程，每隔1s增加run(map或reduce)队列的counter，当counter超过阈值就把任务重新归入wait队列</p>
- <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//coordinator开一个协程来对正在运行的任务进行计时</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Coordinator)</span></span> timemanager() &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		time.Sleep(time.Second)</span><br><span class="line">		<span class="keyword">if</span> !c.runmap.isEmpty() &#123;</span><br><span class="line">			c.runmap.mu.Lock()</span><br><span class="line">			c.runmap.timeplus()</span><br><span class="line">			<span class="keyword">for</span> k, v := <span class="keyword">range</span> c.runmap.runlist &#123;</span><br><span class="line">				<span class="keyword">if</span> v &gt; <span class="number">10</span> &#123;</span><br><span class="line">					c.waitformap.Enqueue(k)</span><br><span class="line">					c.runmap.del(k)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			c.runmap.mu.Unlock()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !c.runreduce.isEmpty() &#123;</span><br><span class="line">			c.runreduce.mu.Lock()</span><br><span class="line">			c.runreduce.timeplus()</span><br><span class="line">			<span class="keyword">for</span> k, v := <span class="keyword">range</span> c.runreduce.runlist &#123;</span><br><span class="line">				<span class="keyword">if</span> v &gt; <span class="number">10</span> &#123;</span><br><span class="line">					c.waitforreduce.Enqueue(k)</span><br><span class="line">					c.runreduce.del(k)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			c.runreduce.mu.Unlock()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//主进程会每秒进行判断，所以这里不需要了，主进程退出，协程也会退出</span></span><br><span class="line">		<span class="comment">// if c.Done() &#123;</span></span><br><span class="line">		<span class="comment">// 	os.Exit(0)</span></span><br><span class="line">		<span class="comment">// &#125;</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>中间文件的问题，如果一个worker产生的中间文件不处理的化，可能造成reduce任务读取出错，所以我使用mr-iHash(filename)-reduceid 的方式命名中间文件，第一个worker写了一半的文件会在下次被删掉</p>
-</li>
-</ol>
-<p><strong>reduce如何区分自己的任务？</strong></p>
-<p>读取所有以reduceid为后缀的文件，作为此次reduce task</p>
-<p><strong>保证没有data race？</strong></p>
-<p>每个队列结构内部都加了sync.Mutex，出队列，入队列都要加锁，计算时间的go rountine 每次也要加锁</p>
-<h2 id="别人的实现"><a href="#别人的实现" class="headerlink" title="别人的实现"></a>别人的实现</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zhujiwei/p/14572977.html">Distributed | MapReduce</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/260752052">MIT 6.824 分布式系统 | Lab 1：MapReduce</a></p>
+<p>malloc大于128K的内存时，使用mmap分配，mmap将虚拟地址空间中的一块区域和文件系统(磁盘)进行一一映射，返回待映射的文件指针，当程序访问(读或写)这块内存时，会产生缺页中断，然后将内容从磁盘拷贝到物理内存中，并在页表中记录。</p>
+<p><strong>这样访问文件系统比read()和write()要快，因为read等系统调用会先将文件拷贝到内核的缓存中，在从内核缓存拷贝到用户空间，而mmap则直接拷贝到用户空间</strong></p>
 
                 
               </div>
@@ -338,8 +365,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>lab1 mapreduce</div>
-      <div>http://xcoderole.github.io/2022/10/01/MIT 6.824 lab1 mapreduce/</div>
+      <div>读书笔记--内存管理</div>
+      <div>http://xcoderole.github.io/2022/10/01/mem/</div>
     </div>
     <div class="license-meta">
       
@@ -383,15 +410,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/10/01/mem/" title="读书笔记--内存管理">
+                      <a href="/2022/10/01/process/" title="读书笔记--进程管理">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">读书笔记--内存管理</span>
+                        <span class="hidden-mobile">读书笔记--进程管理</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2022/10/01/MIT%206.824%20lab1%20mapreduce/" title="lab1 mapreduce">
+                        <span class="hidden-mobile">lab1 mapreduce</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
