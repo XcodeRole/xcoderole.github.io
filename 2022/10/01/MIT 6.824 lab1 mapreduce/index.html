@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
-  <link rel="icon" href="/img/fluid.png">
+  <link rel="icon" href="/img/code.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -16,21 +16,21 @@
   <meta name="author" content="xcoderole">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+    <meta name="description" content="golang rpcGo语言高级编程 我的实现https:&#x2F;&#x2F;github.com&#x2F;XcodeRole&#x2F;6.824-golabs-2021 思路coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://example.com/2022/10/01/hello-world/index.html">
+<meta property="og:title" content="lab1 mapreduce">
+<meta property="og:url" content="http://example.com/2022/10/01/MIT%206.824%20lab1%20mapreduce/index.html">
 <meta property="og:site_name" content="XcodeRole的个人博客">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="golang rpcGo语言高级编程 我的实现https:&#x2F;&#x2F;github.com&#x2F;XcodeRole&#x2F;6.824-golabs-2021 思路coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-01T06:16:40.502Z">
-<meta property="article:modified_time" content="2022-10-01T06:16:40.503Z">
+<meta property="article:published_time" content="2022-10-01T12:25:50.728Z">
+<meta property="article:modified_time" content="2022-10-01T12:33:29.161Z">
 <meta property="article:author" content="xcoderole">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>Hello World - XcodeRole的个人博客</title>
+  <title>lab1 mapreduce - XcodeRole的个人博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -56,11 +56,6 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
-  
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
 
 
 
@@ -189,13 +184,13 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Hello World"></span>
+            <span id="subtitle" data-typed-text="lab1 mapreduce"></span>
           
         </div>
 
@@ -206,8 +201,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-10-01 14:16" pubdate>
-          2022年10月1日 下午
+        <time datetime="2022-10-01 20:25" pubdate>
+          2022年10月1日 晚上
         </time>
       </span>
     
@@ -218,7 +213,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          367 字
+          2.6k 字
         
       </span>
     
@@ -229,7 +224,7 @@
         
         
         
-          4 分钟
+          22 分钟
         
       </span>
     
@@ -267,24 +262,40 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Hello World</h1>
+            <h1 style="display: none">lab1 mapreduce</h1>
             
             
               <div class="markdown-body">
                 
-                <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+                <h2 id="golang-rpc"><a href="#golang-rpc" class="headerlink" title="golang rpc"></a>golang rpc</h2><p><a target="_blank" rel="noopener" href="https://chai2010.cn/advanced-go-programming-book/ch4-rpc/ch4-01-rpc-intro.html">Go语言高级编程</a></p>
+<h2 id="我的实现"><a href="#我的实现" class="headerlink" title="我的实现"></a>我的实现</h2><p><a target="_blank" rel="noopener" href="https://github.com/XcodeRole/6.824-golabs-2021">https://github.com/XcodeRole/6.824-golabs-2021</a></p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>coordinator维护四个队列，waitformap，runmap，waitforreduce、runreduce，分别代表map task的等待队列，map task已经分配正在运行的队列，reduce task的等待队列，reduce task已经分配的正在运行的队列</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> Coordinator <span class="hljs-keyword">struct</span> &#123;<br>	<span class="hljs-comment">// Your definitions here.</span><br>	<span class="hljs-comment">// mapcounter    int</span><br>	<span class="hljs-comment">// reducecounter int</span><br>	<span class="hljs-comment">// idcounter     int</span><br>	<span class="hljs-comment">// 不用counter，四个队列来管理</span><br>	waitformap    Mapqueue<br>	runmap        runmapmanager<br>	waitforreduce Reducequeue<br>	runreduce     runreducemanager<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>通过文件名区分map task，通过reduce id区分reduce task，并且需要注意的一点是在分配reduce任务之前要等待所有的map任务完成</p>
+<p>worker通过for循环不断向coordinator请求任务，分四种情况</p>
+<ol>
+<li>waitformap不为空，这时候分配map task，并把任务归到runmap中</li>
+<li>waitformap为空，所有任务都被分配，判断runmap是否为空，若不为空，则返回worker等待，直到runmap也为空，这时侯所有map任务完成</li>
+<li>以上两个队列都空，判断waitforreduce是否为空，不为空则分配reduce task给worker，并且把任务id归到runreduce中</li>
+<li>当waitforreduce也为空，reduce任务也全部被分配，则判断runreduce是否为空，不为空则返回worker等待，直到runreduce为空，所有任务完成</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Coordinator)</span></span> Dispatch(args *DispatchArgs, reply *DispatchReply) <span class="hljs-type">error</span> &#123;<br>	<span class="hljs-keyword">if</span> !c.waitformap.isEmpty() &#123;<br>		reply.TaskType = <span class="hljs-number">0</span>        <span class="hljs-comment">//0-map</span><br>		task := c.waitformap.Dequeue()<br>		c.runmap.syncenmap(task, <span class="hljs-number">0</span>)<br>		reply.Filename = <span class="hljs-type">string</span>(task)<br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !c.runmap.isEmpty() &#123; <span class="hljs-comment">//wait util all map task done</span><br>		reply.TaskType = <span class="hljs-number">1</span>       <span class="hljs-comment">//1-wait</span><br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !c.waitforreduce.isEmpty() &#123;<br>		reply.TaskType = <span class="hljs-number">2</span>       <span class="hljs-comment">//2-reduce</span><br>		task := c.waitforreduce.Dequeue()<br>		c.runreduce.syncenmap(task, <span class="hljs-number">0</span>)<br>		reply.NoReduce = <span class="hljs-type">int</span>(task)<br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !c.runreduce.isEmpty() &#123;<br>		<span class="hljs-comment">/*</span><br><span class="hljs-comment">			这种情况是考虑到当前worker要等待其他worker执行完reduce。</span><br><span class="hljs-comment">			一旦其他worker执行的reduce任务失败了，还需要重新分配reduce</span><br><span class="hljs-comment">			和上面的wait map task作用一样，只不过这个是等reduce task</span><br><span class="hljs-comment">		*/</span><br>		reply.TaskType = <span class="hljs-number">1</span><br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		reply.TaskType = <span class="hljs-number">3</span>       <span class="hljs-comment">//3-finish</span><br>	&#125;<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p><strong>如何保证一个woker earlier exit，任务没完成就退出之后的正确性？</strong></p>
+<ol>
+<li><p>runmap以及runreduce通过golang的map实现<code>map[task]int</code> 其中的值就是时间counter，开一个协程，每隔1s增加run(map或reduce)队列的counter，当counter超过阈值就把任务重新归入wait队列</p>
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//coordinator开一个协程来对正在运行的任务进行计时</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(c *Coordinator)</span></span> timemanager() &#123;<br>	<span class="hljs-keyword">for</span> &#123;<br>		time.Sleep(time.Second)<br>		<span class="hljs-keyword">if</span> !c.runmap.isEmpty() &#123;<br>			c.runmap.mu.Lock()<br>			c.runmap.timeplus()<br>			<span class="hljs-keyword">for</span> k, v := <span class="hljs-keyword">range</span> c.runmap.runlist &#123;<br>				<span class="hljs-keyword">if</span> v &gt; <span class="hljs-number">10</span> &#123;<br>					c.waitformap.Enqueue(k)<br>					c.runmap.del(k)<br>				&#125;<br>			&#125;<br>			c.runmap.mu.Unlock()<br>		&#125;<br>		<span class="hljs-keyword">if</span> !c.runreduce.isEmpty() &#123;<br>			c.runreduce.mu.Lock()<br>			c.runreduce.timeplus()<br>			<span class="hljs-keyword">for</span> k, v := <span class="hljs-keyword">range</span> c.runreduce.runlist &#123;<br>				<span class="hljs-keyword">if</span> v &gt; <span class="hljs-number">10</span> &#123;<br>					c.waitforreduce.Enqueue(k)<br>					c.runreduce.del(k)<br>				&#125;<br>			&#125;<br>			c.runreduce.mu.Unlock()<br>		&#125;<br>		<span class="hljs-comment">//主进程会每秒进行判断，所以这里不需要了，主进程退出，协程也会退出</span><br>		<span class="hljs-comment">// if c.Done() &#123;</span><br>		<span class="hljs-comment">// 	os.Exit(0)</span><br>		<span class="hljs-comment">// &#125;</span><br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>中间文件的问题，如果一个worker产生的中间文件不处理的化，可能造成reduce任务读取出错，所以我使用mr-iHash(filename)-reduceid 的方式命名中间文件，第一个worker写了一半的文件会在下次被删掉</p>
+</li>
+</ol>
+<p><strong>reduce如何区分自己的任务？</strong></p>
+<p>读取所有以reduceid为后缀的文件，作为此次reduce task</p>
+<p><strong>保证没有data race？</strong></p>
+<p>每个队列结构内部都加了sync.Mutex，出队列，入队列都要加锁，计算时间的go rountine 每次也要加锁</p>
+<h2 id="别人的实现"><a href="#别人的实现" class="headerlink" title="别人的实现"></a>别人的实现</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zhujiwei/p/14572977.html">Distributed | MapReduce</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/260752052">MIT 6.824 分布式系统 | Lab 1：MapReduce</a></p>
 
                 
               </div>
@@ -302,8 +313,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Hello World</div>
-      <div>http://example.com/2022/10/01/hello-world/</div>
+      <div>lab1 mapreduce</div>
+      <div>http://example.com/2022/10/01/MIT 6.824 lab1 mapreduce/</div>
     </div>
     <div class="license-meta">
       
@@ -381,9 +392,6 @@
 
 
 
-
-
-  
 
 
 
