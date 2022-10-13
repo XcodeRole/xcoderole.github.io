@@ -1,0 +1,776 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/code.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="xcoderole">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="raft paper reviewpaper link一定要看论文，原文描述的非常清晰，我英文水平实在有限，翻译之后用词实在是不准确，所以paper review中保留了很多原文中更准确的英文  raft可视化模拟网站Raft Scope Raft review一致性算法 有限状态机(FSM)  就是一个系统存在有限数的状态state，两个state之间的转换是通过一些input，然后这个转化称为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XcodeRole的个人博客">
+<meta property="og:url" content="http://xcoderole.github.io/2022/10/13/raft%20paper%20review/index.html">
+<meta property="og:site_name" content="XcodeRole的个人博客">
+<meta property="og:description" content="raft paper reviewpaper link一定要看论文，原文描述的非常清晰，我英文水平实在有限，翻译之后用词实在是不准确，所以paper review中保留了很多原文中更准确的英文  raft可视化模拟网站Raft Scope Raft review一致性算法 有限状态机(FSM)  就是一个系统存在有限数的状态state，两个state之间的转换是通过一些input，然后这个转化称为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://xcoderole.github.io/2022/10/13/raft%20paper%20review/1.png">
+<meta property="og:image" content="http://xcoderole.github.io/2022/10/13/raft%20paper%20review/2.png">
+<meta property="article:published_time" content="2022-10-13T09:14:36.158Z">
+<meta property="article:modified_time" content="2022-10-13T09:19:41.055Z">
+<meta property="article:author" content="xcoderole">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://xcoderole.github.io/2022/10/13/raft%20paper%20review/1.png">
+  
+  
+  
+  <title>XcodeRole的个人博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"xcoderole.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":60,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"ZJGBFXdDz0pLem2XjJVwNMkM-gzGzoHsz","app_key":"kfUpkgWJhVtU16OIkfAuN2Hj","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>XcodeRole</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text=""></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-13 17:14" pubdate>
+          2022年10月13日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          50 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none"></h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="raft-paper-review"><a href="#raft-paper-review" class="headerlink" title="raft paper review"></a>raft paper review</h1><h2 id="paper-link"><a href="#paper-link" class="headerlink" title="paper link"></a>paper link</h2><p>一定要看论文，原文描述的非常清晰，我英文水平实在有限，翻译之后用词实在是不准确，所以paper review中保留了很多原文中更准确的英文</p>
+<p><a target="_blank" rel="noopener" href="http://nil.csail.mit.edu/6.824/2021/papers/raft-extended.pdf"></a></p>
+<h2 id="raft可视化模拟网站"><a href="#raft可视化模拟网站" class="headerlink" title="raft可视化模拟网站"></a>raft可视化模拟网站</h2><p><a target="_blank" rel="noopener" href="https://raft.github.io/raftscope/index.html">Raft Scope</a></p>
+<p><a target="_blank" rel="noopener" href="http://thesecretlivesofdata.com/raft/">Raft</a></p>
+<h2 id="review"><a href="#review" class="headerlink" title="review"></a>review</h2><h3 id="一致性算法"><a href="#一致性算法" class="headerlink" title="一致性算法"></a>一致性算法</h3><ol>
+<li><p>有限状态机(FSM)</p>
+<p> 就是一个系统存在有限数的状态state，两个state之间的转换是通过一些input，然后这个转化称为transition</p>
+</li>
+<li><p>复制状态机(state machine replication)</p>
+<p> 我理解的复制状态机其实就是保持多个系统之间的状态同步，只要他们的初始状态一致，输入序列一致，那么转化后的状态也是一致的，分布式系统的容错能力一般就是通过将一个服务运行在多个副本上，并且保持多个副本的一致性，这就涉及到一致性算法了，引入下面的raft算法</p>
+</li>
+</ol>
+<h3 id="Raft-基础规则"><a href="#Raft-基础规则" class="headerlink" title="Raft 基础规则"></a>Raft 基础规则</h3><p>一个raft集群肯定包含多个服务器，只要集群中大多数的服务器不出问题，那么整个系统的状态就是不出错的，以5个服务器为例，系统最多可以有两台机器出错。</p>
+<p>raft把时间划分为一个个的term(任期)，一个term从选举开始，在任一时刻，当前服务器一定处于leader、follower、candidate这三种状态中的一种</p>
+<img src="/2022/10/13/raft%20paper%20review/1.png" srcset="/img/loading.gif" lazyload class="">
+
+<ol>
+<li>在一个term(任期)中，最多只能有一个leader，当然，如果在竞选中出现平票，那么就不存在leader，然后进入下一个term</li>
+<li>follower状态的服务器是只能是被动回复请求(request)：他只能回复来自leader或者candidate的request，如果follower收到了来自client(客户端)的请求，那么他会把这个请求重定向给leader</li>
+<li>candidate是在竞选期间存在的一种中间状态(触发条件在后面提到)，选举完成在一个term期间，一个server不是leader就是follower</li>
+</ol>
+<p><strong>注意：</strong></p>
+<ol>
+<li>不同的服务器可能在不同的时间观察到term之间的转化，因为存在很多不确定因素(网络延迟，丢包，服务器failure然后restart等)，但是即使存在很多不确定因素，当一个服务器从failure状态转化到正常运行状态并且网络状态良好之后，raft也会通过一定方式保持服务器之间的一致性，这后面会详细提到</li>
+<li>每个服务器自己保存自己当前的term数，本地term的更新可能是因为开始了一次新的选举或者通过服务器之间的通信，比如当前服务器的term低于与自己通信的另一个服务器term，那么就更新到那个更大的term</li>
+<li>如果一个candidate或者leader发现自己的term过期了(比与自己通信的服务器term低)，那么就会立刻转换到follower状态，这也保证了一个term内只有一个leader</li>
+<li>如果一个服务器收到了来自比自己term低的服务器的请求，就会拒绝这个请求</li>
+</ol>
+<p>三种状态的转换关系图：</p>
+<img src="/2022/10/13/raft%20paper%20review/2.png" srcset="/img/loading.gif" lazyload class="">
+
+<p>raft服务器之间的通信是通过RPC完成的，raft中存在两种主要的种RPC：</p>
+<ol>
+<li>requestVote RPCs，candidate选举期间掉用</li>
+<li>AppendEntries RPCs，leader调用，用来复制log entries给follower并且发送heart beat来维护自己的任期(follwer超时不收到heat beat就会转换到candidate状态开启一个新的term并开始给自己拉票选举)</li>
+</ol>
+<p>raft将一致性问题分解为三个独立的子问题：</p>
+<ol>
+<li>Leader election，选举leader，当一个leader fail之后，需要选举新的leader</li>
+<li>Log replication，日志复制，一个leader必须从客户端接收request并且复制给集群中的其他server，要保持其他服务器的日志和本地的一致</li>
+<li>safety：包括<ol>
+<li><p>election safety：保证了一个term最多一个leader</p>
+</li>
+<li><p>Leader Append-Only:leader不覆盖或者删除<strong>自身</strong>的log entries，只追加，如果follower的log和自己的冲突，还是要通知follower删除日志的</p>
+</li>
+<li><p>Log Matching：如果两个日志存在某个index以及term都相同的log entry，这个index及往前追溯所有的index的log entries都一定是一致的</p>
+<p> 原文：Log Matching: if two logs contain an entry with the same index and term, then the logs are identical in all entries up through the given index.</p>
+</li>
+<li><p>Leader Completeness：某个已经committed的log entry一定要保证在更高term的leader中也存在，后面safety会讲到原因，就是raft增加了一个给leader election中candidate投票的限制，从而保证任何term的leader一定要包含pre-term中committed的log entry</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="leader-election"><a href="#leader-election" class="headerlink" title="leader election"></a>leader election</h3><p><strong>raft使用heartbeat的机制触发leader election</strong>，一台机器初始的state是follower，只要这个follower接受到来自leader或者candidate的RPC请求，那么他就保持follower的state，leader会定时发送heartbeat给所有followers(其实就是不携带log entries的append log RPC)来维持自己的leader地位。</p>
+<p>如果一个follower一段时间内没收到任何通信(也就是timeout了)，那么他就会把自己的term加一，然后开始新的leader election(选举自己），他先给自己投一票，然后并行给所有的服务器发送RequestVote RPC，这个candidate的状态会一直保持直到发生一下三种情况：a)自己赢得多数选票，成为leader；b)有另外一个服务器宣布自己成为leader；c)没有任何人胜出。</p>
+<p><strong>选举规则：</strong>每个服务器最多投一票，发起选举的服务器会投自己一票，其他服务器遵循先来先服务的思想投票(我理解这其实也算是考虑到了网络延迟，先来的网络延迟相对比较低，得到的票也多)，获得majority投票的胜出，我理解的majority是大于（cluster中server的数量&#x2F;2）的投票数。当一个服务器获胜成为leader，就会发送heartbeat给其他服务器，以阻止其他candidate继续发起选举。</p>
+<p><strong>考虑这种情况，</strong>在某个term内已经有某个leader，但是某个server由于网络波动没有收到heartbeat，他就会发起leader election，这时如果网络已经恢复，在选举期间收到了leader的AppendEntries RPC (heartbeat)，那么他就会判断这个leader的term是否大于等于自己的term，如果leader的term小于自己的term，那就会拒绝这个AppendEntries RPC的request并且继续选举。如果大于等于自己的term，那他就会停止选举，切换到follower状态。</p>
+<p><strong>还需要考虑存</strong>在多个candidate并且大家都没有获得majority数量的投票数量，那么每个candidate就会timeout并且再次增加自己的term，然后进行新的leader election，直到出现获胜者。但是这种情况会有bug，如果不增加新的投票机制，那么split vote的情况就可能无限制的出现，导致系统不可用，所以raft会将election的timeout的时间设置为在一定范围内的随机数，这样的化，大家timeout的时间就会错开，第一个timeout的candidate赢得选举的概率就很大，通过这个办法来防止下次出现split vote。</p>
+<h3 id="Log-replication"><a href="#Log-replication" class="headerlink" title="Log replication"></a>Log replication</h3><p><strong>大致流程：</strong></p>
+<p>当leader被选举出来之后，他就要开始接受client的请求，每个请求包括一个需要被复制状态机(就是集群系统)执行的命令，leader将这个指令作为一条entry加入本地log，然后并行向集群中的其他服务器发送AppendEntries RPCs，将这条log entry复制到其他的服务器。如果这个log entry被复制到了大多数的服务器，那么这个log entry就可以commit，被标记为committed，然后返回完成状态给client，并且在下次heartbeat时通知集群中的其他服务器apply这条log entry来改变状态机。具体的细节：leader本地会跟踪最新被commit的log entry的index，并且在heartbeat时发送给其他follower，follower发现某条新commit的log entry时就会将他apply到本地。如果这个heartbeat(AppendEntries RPC)由于网络或者其他原因没有成功通信到达某个follower，那么leader就是一直给他发送下去，直到RPC调用成功。</p>
+<p><strong>log entries：</strong></p>
+<p>每个log entry其实就是一条client发送来的command，每条log entry都有包含自己在所有logs中的index，以及产生这条log entry的leader的term</p>
+<p><strong>server之间的log entry一致性：</strong></p>
+<ol>
+<li>任意两个服务器的log entries中，如果某条log entry他们的index以及term相同，那么一定是同一条</li>
+<li>任意两个服务器的log entries中，如果某条log entry他们的index以及term相同，那么在这条log entry之前的所有log entries也一定相同</li>
+</ol>
+<p>因为一个term内最多一个leader，log entry是由leader接受command并写入的，并且由这个leader发送AppendEntries RPC给其他服务器，所以他一定会保证index+term唯一确定command（我理解的是commited的log entry），即使在服务期间leaderr挂掉了，那么下一条log entry的term一定会增加的。如果follower挂掉了，不足以保证大多数服务器都复制了这条log entry，那么leader就不会commit这个log entry。</p>
+<p><strong>当leader和follower的日志之间出现了不一致，那么leader就会强制把自己本地的日志作为标准，将follower的日志于自己的同步，也就是会覆盖不一致的follower的日志</strong> 具体实现的细节大致为：</p>
+<p>leader为每个follower维护一个nextindex(初始化为自己的log entry的下一个index)，这个nextindex会在调用AppendEntries RPC的时候作为参数传给follower，follower会检查这个nextindex是否合法(每次RPC都会首先检查合法性)，如果非法并且拒绝之后，leader就会逐渐减小这个nextindex，直到合法。然后增加日志条目。也就是一致回溯到二者最近一致的日志条目。</p>
+<h3 id="Safety"><a href="#Safety" class="headerlink" title="Safety"></a>Safety</h3><p>上面只是提到了log replication的大致流程，但是如果在某步中leader或者follower挂掉了，那么就要考虑更多情况</p>
+<p><strong>比如考虑这种情况：</strong></p>
+<p>当一个leader commit多个log entry的时候，某个follower是crash的状态，然后他恢复过来之后timeout，竞选成为leader，那么他就会强行把自己的日志作为标准来复制到其他服务器，这就会导致committed的条目也会被覆盖，这是不安全的操作，所以raft对此的解决方案是：</p>
+<p>在leader election的时候就增加一个投票标准，只有那些包含pre term committed的日志条目的candidate才有可能成为leader，也就是candidate必须包含所有之前的term已经提交的日志才会得到投票。实现起来的细节就是，candidate在调用RequestVote RPC来竞选时包含了自己的最后一条日志的index以及term，投票者在收到这两个参数时，会比较candidate最后一条日志的term和自己最后一条日志的term，谁大就说明谁就<strong>更up-to-date</strong>，如果term相同，那就是index谁大谁新，如果candiadte的log entry更加up-to-date就给他投票。新出现的leader需要得到大多数服务器的投票，而一个被提交的日志一定存储在大多数服务器中，这就保证了新出现的leader一定是包含往届所有提交的日志。</p>
+<p><strong>当前term的leader提交往期的未提交的日志条目：</strong></p>
+<p>当前term的leader不会统计哪些log entry被大多数server append但是却没有被leader commit（可能在复制之后leader就crash了）的log entry（起个名字叫specific entry），他只会关注自己的term增加的log entry，由于那个specific entry被大多数server append到了本地日志，那么现任leader本地日志中也一定会存在这个条目，不然他得不到大多数投票，所以下次他commit当前term的log entry的时候也会顺便把之前存在的没有committed的日志commit并且apply。</p>
+<p><strong>时间和可用性：</strong></p>
+<ol>
+<li><p>系统的可用性必须要靠时间来保证</p>
+</li>
+<li><p>一些相应时间必须严格遵守这个式子：</p>
+<p> <strong>broadcastTime ≪ electionTimeout ≪ MTBF</strong></p>
+<ol>
+<li><p>broadcastTime ≪ electionTimeout:</p>
+<p> broadcastTime是单个服务器并行向所有其他服务器发送RPC的时间，如果广播时间大于electionTimeout的话，leader就不可能维护自己的任期，因为还没有来得及发送heartbeat，其他服务器就开始自己竞选leader了</p>
+</li>
+<li><p>electionTimeout ≪ MTBF：</p>
+<p>MTBF指的是平均两个服务器crash之间的间隔时间，这个也好理解，不能服务器还没竞选成leader就一直挂掉</p>
+</li>
+</ol>
+<p> 论文中说可能的时间：broadcast time may range from 0.5ms to 20ms；the election timeout is likely to be somewhere between 10ms and 500ms.server MTBFs are several months or more</p>
+</li>
+</ol>
+<p>论文还讨论了持久化，宕机之后的状态恢复，由于6.824lab2没有要求这块，所以之后再看</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div></div>
+      <div>http://xcoderole.github.io/2022/10/13/raft paper review/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>xcoderole</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/01/process/" title="读书笔记--进程管理">
+                        <span class="hidden-mobile">读书笔记--进程管理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZJGBFXdDz0pLem2XjJVwNMkM-gzGzoHsz","appKey":"kfUpkgWJhVtU16OIkfAuN2Hj","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
