@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://xcoderole.github.io/2022/10/19/lab%202A%20leader%20election/</loc>
+    
+    <lastmod>2022-10-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://xcoderole.github.io/2022/10/13/raft%20paper%20review/</loc>
     
     <lastmod>2022-10-13</lastmod>
@@ -49,7 +58,7 @@
 
   <url>
     <loc>http://xcoderole.github.io/</loc>
-    <lastmod>2022-10-13</lastmod>
+    <lastmod>2022-10-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
